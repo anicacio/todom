@@ -1,5 +1,4 @@
-let tarefas = [
-    {
+let tarefas = [{
         id: 10,
         texto: "Escovar os dentes",
         prioridade: 3,
@@ -27,7 +26,11 @@ let tarefas = [
 
 // Array de prioridades
 // const prioridades = ['baixa','média','alta'];
-const prioridades = {1:'baixa',2:'média',3:'alta'}
+const prioridades = {
+    1: 'baixa',
+    2: 'média',
+    3: 'alta'
+}
 const render = (tarefas) => {
 
     // Capturar o elemento que contém a lista de tarefas
@@ -44,14 +47,14 @@ const render = (tarefas) => {
 
         // Criando uma linha de tabela
         let row = document.createElement('tr');
-        if(tarefa.feito){
+        if (tarefa.feito) {
             row.className = "done";
             // row.classList.add("done");
         }
 
         // Criar o input checkbox
         let checkbox = document.createElement('input');
-        checkbox.setAttribute("type","checkbox");
+        checkbox.setAttribute("type", "checkbox");
         checkbox.checked = tarefa.feito;
         checkbox.id = "chk_" + tarefa.id;
         checkbox.addEventListener('click', onCheckClick);
@@ -91,30 +94,30 @@ const render = (tarefas) => {
 }
 
 const onDeleteClick = (evt) => {
-    
+
     // Capturando id da tarefa a ser removida;
     let id = Number(evt.target.id);
 
     // Confirmar a exclusão
-    if(!window.confirm("Tem certeza que deseja excluir a tarefa?")){
+    if (!window.confirm("Tem certeza que deseja excluir a tarefa?")) {
 
         // Usuário clicou em não. Abortando.
         return;
 
     }
-    
+
     // Remover a tarefa do array
     destroy(id);
 
     // Renderizar a lista novamente
     render(tarefas);
-    
+
 }
 
 const onCheckClick = evt => {
 
     // capturando o id da tarefa clicada
-    let id = Number(evt.target.id.replace('chk_',''));
+    let id = Number(evt.target.id.replace('chk_', ''));
 
     // Levantar tarefa do id capturado
     let tarefa = tarefas.find(t => t.id == id);
@@ -124,7 +127,7 @@ const onCheckClick = evt => {
 
     // Alterando a classe da tr que contem o td que contem o checkbox;
     evt.target.parentNode.parentNode.classList.toggle('done');
-    
+
 }
 
 /**
@@ -134,11 +137,11 @@ const onCheckClick = evt => {
  * prioridade: com base na prioridade passada como parâmetro
  * feito: false
  */
- const create = (texto,prioridade) => {
+const create = (texto, prioridade) => {
 
     // Determinando o id do novo elemento
     let id = (tarefas.length == 0 ? 1 : tarefas[tarefas.length - 1].id + 1);
-    
+
     // retornando a nova tarefa
     return {
         id,
@@ -149,12 +152,12 @@ const onCheckClick = evt => {
 
     // Alteração para provocar conflito!!
 
- }
+}
 
- /**
-  * Criar uma função destroy que recebne o id de uma tarefa como parâmetro
-  * e remove essa tarefa do array  * 
-  */
+/**
+ * Criar uma função destroy que recebne o id de uma tarefa como parâmetro
+ * e remove essa tarefa do array  * 
+ */
 const destroy = (id) => {
     tarefas = tarefas.filter(t => t.id != id);
 }
@@ -174,7 +177,7 @@ const onFormSubmit = (evt) => {
 
     // Evitar o comportamento padrão de um form
     evt.preventDefault();
-    
+
     // Capturar o texto digitado pelo utextosuário
     let texto = document.getElementById("tf_2do").value;
 
@@ -184,7 +187,7 @@ const onFormSubmit = (evt) => {
     }
 
     // Verificar se existe prioridade settada nesse texto
-    let strInicio = texto.substr(0,3);
+    let strInicio = texto.substr(0, 3);
     let prioridade;
     switch (strInicio) {
         case '#1 ':
@@ -196,19 +199,19 @@ const onFormSubmit = (evt) => {
             prioridade = 2;
             texto = texto.slice(3);
             break;
-        
+
         case '#3 ':
             prioridade = 3;
             texto = texto.slice(3);
             break;
-    
+
         default:
             prioridade = 1;
             break;
     }
 
     // Criar o objeto de tarefa sabendo o texto e a prioridade
-    let tarefa = create(texto,prioridade);
+    let tarefa = create(texto, prioridade);
 
     // Adicionar o objeto tarefa ao array de tarefas
     tarefas.push(tarefa);
@@ -217,7 +220,7 @@ const onFormSubmit = (evt) => {
     render(tarefas);
 
     // Lipar o campo de texto
-    document.getElementById("tf_2do").value = ""; 
+    document.getElementById("tf_2do").value = "";
 
 }
 
@@ -225,3 +228,103 @@ const onFormSubmit = (evt) => {
 form.addEventListener('submit', onFormSubmit);
 
 render(tarefas);
+
+
+
+
+
+var canvas = $("#canvas"),
+    context = canvas.get(0).getContext("2d"),
+    $result = $('#result');
+
+$('#fileInput').on('change', function () {
+    if (this.files && this.files[0]) {
+        if (this.files[0].type.match(/^image\//)) {
+            var reader = new FileReader();
+            reader.onload = function (evt) {
+                var img = new Image();
+                img.onload = function () {
+                    context.canvas.height = img.height;
+                    context.canvas.width = img.width;
+                    context.drawImage(img, 0, 0);
+                    var cropper = canvas.cropper({
+                        aspectRatio: 16 / 9
+                    });
+                    $('#btnCrop').click(function () {
+                        // Get a string base 64 data url
+                        var croppedImageDataURL = canvas.cropper('getCroppedCanvas').toDataURL("image/png");
+                        $result.append($('<img>').attr('src', croppedImageDataURL));
+                    });
+                    $('#btnRestore').click(function () {
+                        canvas.cropper('reset');
+                        $result.empty();
+                    });
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(this.files[0]);
+        } else {
+            alert("Invalid file type! Please select an image file.");
+        }
+    } else {
+        alert('No file(s) selected.');
+    }
+});
+
+
+// vars
+let result = document.querySelector(".result"),
+  img_result = document.querySelector(".img-result"),
+  img_w = document.querySelector(".img-w"),
+  img_h = document.querySelector(".img-h"),
+  options = document.querySelector(".options"),
+  save = document.querySelector(".save"),
+  cropped = document.querySelector(".cropped"),
+  dwn = document.querySelector(".download"),
+  upload = document.querySelector("#file-input"),
+  cropper = "";
+
+// on change show image with crop options
+upload.addEventListener("change", (e) => {
+  if (e.target.files.length) {
+    // start file reader
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target.result) {
+        // create new image
+        let img = document.createElement("img");
+        img.id = "image";
+        img.src = e.target.result;
+        // clean result before
+        result.innerHTML = "";
+        // append new image
+        result.appendChild(img);
+        // show save btn and options
+        save.classList.remove("hide");
+        options.classList.remove("hide");
+        // init cropper
+        cropper = new Cropper(img);
+      }
+    };
+    reader.readAsDataURL(e.target.files[0]);
+  }
+});
+
+// save on click
+save.addEventListener("click", (e) => {
+  e.preventDefault();
+  // get result to data uri
+  let imgSrc = cropper
+    .getCroppedCanvas({
+      width: img_w.value // input value
+    })
+    .toDataURL();
+  // remove hide class of img
+  cropped.classList.remove("hide");
+  img_result.classList.remove("hide");
+  // show image cropped
+  cropped.src = imgSrc;
+  dwn.classList.remove("hide");
+  dwn.download = "imagename.png";
+  dwn.setAttribute("href", imgSrc);
+});
